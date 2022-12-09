@@ -99,6 +99,10 @@ export function ShopList() {
     setIsError(false);
   }
 
+  const isAlphabetOnly = (shopName) => {
+    return /^[a-zA-Z ]*$/.test(shopName);
+  }
+
   return (
     <div>
       <Button onClick={() => setIsModalOpen(true)}>+Add Shop</Button>
@@ -129,6 +133,8 @@ export function ShopList() {
             name: e.target.value,
           })}
         />
+        {console.log(isAlphabetOnly(newShopInfo.name), )}
+        {!isAlphabetOnly(newShopInfo.name) && <small style={{color: "red"}}>Only alphabets are allowed</small>}
         {isError && !newShopInfo.name && <small style={{color: "red"}}>Shop name is required</small>}
 
         <Select
@@ -179,7 +185,7 @@ export function ShopList() {
         {isError && (!newShopInfo.openingDate || !newShopInfo.closingDate) && <small style={{color: "red"}}>Date range is required</small>}
 
         <Button onClick={() => {
-          if (!newShopInfo.name || !newShopInfo.area || !newShopInfo.category || !newShopInfo.openingDate || !newShopInfo.closingDate) {
+          if (!newShopInfo.name || !newShopInfo.area || !newShopInfo.category || !newShopInfo.openingDate || !newShopInfo.closingDate || !isAlphabetOnly(newShopInfo.name)) {
             setIsError(true);
             return;
           }

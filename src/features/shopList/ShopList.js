@@ -33,6 +33,7 @@ export function ShopList() {
   const [newCategory, setNewCategory] = useState("");
   const [editShopId, setEditShopId] = useState("");
   const [newShopInfo, setNewShopInfo] = useState(initialShopInfo);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const findShop = shopData.find(shop => shop.id === editShopId);
@@ -95,6 +96,7 @@ export function ShopList() {
     setIsModalOpen(false);
     setNewShopInfo(initialShopInfo);
     setEditShopId("");
+    setIsError(false);
   }
 
   return (
@@ -127,6 +129,7 @@ export function ShopList() {
             name: e.target.value,
           })}
         />
+        {isError && !newShopInfo.name && <small style={{color: "red"}}>Shop name is required</small>}
 
         <Select
           showSearch
@@ -139,6 +142,7 @@ export function ShopList() {
           })}
           dropdownRender={(menu) => dropDownRender(menu, "area")}
         />
+        {isError && !newShopInfo.area && <small style={{color: "red"}}>Area is required</small>}
 
         <Select
           showSearch
@@ -151,6 +155,7 @@ export function ShopList() {
           })}
           dropdownRender={(menu) => dropDownRender(menu, "category")}
         />
+        {isError && !newShopInfo.category && <small style={{color: "red"}}>Category is required</small>}
 
         {
           editShopId && <>
@@ -171,8 +176,14 @@ export function ShopList() {
             closingDate: new Date(e[1]["$d"]).getTime(),
           })}
         />
+        {isError && (!newShopInfo.openingDate || !newShopInfo.closingDate) && <small style={{color: "red"}}>Date range is required</small>}
 
         <Button onClick={() => {
+          if (!newShopInfo.name || !newShopInfo.area || !newShopInfo.category || !newShopInfo.openingDate || !newShopInfo.closingDate) {
+            setIsError(true);
+            return;
+          }
+
           editShopId
           ? dispatch(updateShop(newShopInfo))
           : dispatch(addShop({ ...newShopInfo, id: uuidv4() }));

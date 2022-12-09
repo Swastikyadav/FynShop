@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { PlusOutlined } from '@ant-design/icons';
 import { Modal, Input, Select, Divider, Space, Button, DatePicker } from 'antd';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
 import {
   addShop,
+  deleteShop,
+  updateShop,
   addNewArea,
   addNewCategory,
   selectShopList,
@@ -17,16 +20,27 @@ export function ShopList() {
   const { shopList: { shopData, areaDropdownOptions, categoryDropdownOptions } } = useSelector(selectShopList);
   const dispatch = useDispatch();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newArea, setNewArea] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [newShopInfo, setNewShopInfo] = useState({
+  const initialShopInfo = {
     name: "",
     area: "",
     category: "",
     openingDate: "",
     closingDate: "",
-  });
+  }
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newArea, setNewArea] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [editShopId, setEditShopId] = useState("");
+  const [newShopInfo, setNewShopInfo] = useState(initialShopInfo);
+
+  useEffect(() => {
+    const findShop = shopData.find(shop => shop.id === editShopId);
+
+    if (!!findShop) {
+      setNewShopInfo(findShop);
+    }
+  }, [editShopId]);
 
   const dropDownRender = (menu, selectType) => {
     return (
@@ -77,23 +91,33 @@ export function ShopList() {
     );
   }
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setNewShopInfo(initialShopInfo);
+    setEditShopId("");
+  }
+
   return (
     <div>
       <Button onClick={() => setIsModalOpen(true)}>+Add Shop</Button>
       {
         shopData.map((shop, idx) => {
-          return (<React.Fragment key={idx}>
+          return (<React.Fragment key={shop.id}>
             <p>{shop.name}</p>
+            <small onClick={() => dispatch(deleteShop(shop.id))}>Delete</small>
+            <small id={shop.id} onClick={() => {
+              setEditShopId(shop.id);
+              setIsModalOpen(true);
+            }}>Update</small>
           </React.Fragment>)
         })
       }
 
       {isModalOpen && <Modal
-        title="Add New Shop"
+        title={editShopId ? "Edit Shop" : "Add New Shop"}
         footer={null}
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        afterClose={() => setIsModalOpen(false)}
+        onCancel={closeModal}
       >
         <Input
           placeholder="Shop Name"
@@ -108,6 +132,7 @@ export function ShopList() {
           showSearch
           placeholder="Select or add new area."
           options={areaDropdownOptions}
+          value={newShopInfo.area}
           onChange={e => setNewShopInfo({
             ...newShopInfo,
             area: e,
@@ -119,6 +144,7 @@ export function ShopList() {
           showSearch
           placeholder="Select or add new category."
           options={categoryDropdownOptions}
+          value={newShopInfo.category}
           onChange={e => setNewShopInfo({
             ...newShopInfo,
             category: e,
@@ -126,14 +152,34 @@ export function ShopList() {
           dropdownRender={(menu) => dropDownRender(menu, "category")}
         />
 
-        <RangePicker onChange={e => setNewShopInfo({
-          ...newShopInfo,
-          openingDate: moment(e[0]["$d"]),
-          closingDate: moment(e[1]["$d"]),
-        })} />
+        {
+          editShopId && <>
+            <p>
+              Opening Date: {moment(new Date(newShopInfo.openingDate)).format("YYYY MMM Do")}
+            </p>
+            <p>
+              Closing Date: {moment(new Date(newShopInfo.closingDate)).format("YYYY MMM Do")}
+            </p>
+          </>
+        }
+        
+        {editShopId && <small>Change opening and closing date</small>}
+        <RangePicker
+          onChange={e => setNewShopInfo({
+            ...newShopInfo,
+            openingDate: new Date(e[0]["$d"]).getTime(),
+            closingDate: new Date(e[1]["$d"]).getTime(),
+          })}
+        />
 
-        <Button onClick={() => dispatch(addShop(newShopInfo))}>
-          Add Shop
+        <Button onClick={() => {
+          editShopId
+          ? dispatch(updateShop(newShopInfo))
+          : dispatch(addShop({ ...newShopInfo, id: uuidv4() }));
+
+          closeModal();
+        }}>
+          {editShopId ? "Edit Shop" : "Add Shop"}
         </Button>
       </Modal>}
     </div>

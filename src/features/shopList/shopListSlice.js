@@ -11,6 +11,20 @@ export const shopListSlice = createSlice({
     addShop: (state, action) => {
       state.shopData.push(action.payload);
     },
+    deleteShop: (state, action) => {
+      state.shopData = state.shopData.filter(shop => {
+        return shop.id !== action.payload;
+      });
+    },
+    updateShop: (state, action) => {
+      state.shopData = state.shopData.map(shop => {
+        if (shop.id === action.payload.id) {
+          return action.payload;
+        }
+
+        return shop;
+      });
+    },
     addNewArea: (state, action) => {
       state.areaDropdownOptions.push(action.payload);
     },
@@ -20,7 +34,13 @@ export const shopListSlice = createSlice({
   }
 });
 
-export const { addShop, addNewArea, addNewCategory } = shopListSlice.actions;
+export const {
+  addShop,
+  deleteShop,
+  updateShop,
+  addNewArea,
+  addNewCategory
+} = shopListSlice.actions;
 
 // shopList Selector
 export const selectShopList = (state) => state;

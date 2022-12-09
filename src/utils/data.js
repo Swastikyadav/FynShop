@@ -1,6 +1,6 @@
 import moment from "moment";
 
-const shopData = [
+export const shopData = [
   {
     name: "Swastik Medical Store",
     area: "Badarpur",
@@ -73,4 +73,60 @@ const shopData = [
   }
 ];
 
-export default shopData;
+export const areaDropdownOptions = [
+  {
+    value: "Badarpur",
+    label: "Badarpur",
+  },
+  {
+    value: "Thane",
+    label: "Thane",
+  },
+  {
+    value: "Pune",
+    label: "Pune",
+  },
+  {
+    value: "Mumbai Suburbun",
+    label: "Mumbai Suburbun",
+  },
+  {
+    value: "Nashik",
+    label: "Nashik",
+  },
+  {
+    value: "Nagpur",
+    label: "Nagpur",
+  },
+  {
+    value: "Ahmednagar",
+    label: "Ahmednagar",
+  },
+  {
+    value: "Solapur",
+    label: "Solapur",
+  },
+];
+
+export const categoryDropdownOptions = [
+  {
+    value: "Chemist",
+    label: "Chemist",
+  },
+  {
+    value: "Grocery",
+    label: "Grocery",
+  },
+  {
+    value: "Baker",
+    label: "Baker",
+  },
+  {
+    value: "Butcher",
+    label: "Butcher",
+  },
+  {
+    value: "Stationery",
+    label: "Stationery",
+  },
+]

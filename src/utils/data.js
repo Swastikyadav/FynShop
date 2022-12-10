@@ -22,7 +22,7 @@ export const shopData = [
     area: "Pune",
     category: "Baker",
     openingDate: new Date("2022-10-12").getTime(),
-    closingDate: new Date("2022-01-16").getTime(),
+    closingDate: new Date("2023-01-16").getTime(),
     id: uuidv4(),
   },
   {

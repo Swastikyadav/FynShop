@@ -12,6 +12,10 @@ import {
   addNewArea,
   addNewCategory,
   selectShopList,
+  filterByArea,
+  filterByCategory,
+  filterByStatus,
+  clearFilter,
 } from './shopListSlice';
 
 const { RangePicker } = DatePicker;
@@ -33,6 +37,9 @@ export function ShopList() {
   const [newCategory, setNewCategory] = useState("");
   const [editShopId, setEditShopId] = useState("");
   const [newShopInfo, setNewShopInfo] = useState(initialShopInfo);
+  const [areaFilter, setAreaFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
@@ -105,12 +112,68 @@ export function ShopList() {
 
   return (
     <div>
+      <p>Filters</p>
+      <Select
+        placeholder="Filter by area"
+        options={areaDropdownOptions}
+        value={areaFilter}
+        onChange={e => {
+          setAreaFilter(e);
+          setCategoryFilter("");
+          setStatusFilter("");
+          dispatch(filterByArea(e));
+        }}
+      />
+      <Select
+        placeholder="Filter by category"
+        options={categoryDropdownOptions}
+        value={categoryFilter}
+        onChange={e => {
+          setCategoryFilter(e);
+          setAreaFilter("");
+          setStatusFilter("");
+          dispatch(filterByCategory(e));
+        }}
+      />
+
+      <Select
+        placeholder="Filter by open/close status"
+        options={[
+          {
+            value: "open",
+            label: "Open",
+          },
+          {
+            value: "close",
+            label: "Close",
+          }
+        ]}
+        value={statusFilter}
+        onChange={e => {
+          setCategoryFilter("");
+          setAreaFilter("");
+          setStatusFilter(e);
+          dispatch(filterByStatus(e));
+        }}
+      />
+
+      <Button onClick={() => {
+        setAreaFilter("");
+        setCategoryFilter("");
+        dispatch(clearFilter());
+      }}>Clear Filter</Button>
+
       <Button onClick={() => setIsModalOpen(true)}>+Add Shop</Button>
       {
         shopData.map((shop, idx) => {
           return (<React.Fragment key={shop.id}>
             <p>{shop.name}</p>
+            <small>
+              {moment(new Date(shop.openingDate)).format("YYYY MMM Do")} - {moment(new Date(shop.closingDate)).format("YYYY MMM Do")}
+            </small>
+            <br />
             <small onClick={() => dispatch(deleteShop(shop.id))}>Delete</small>
+            <br />
             <small id={shop.id} onClick={() => {
               setEditShopId(shop.id);
               setIsModalOpen(true);

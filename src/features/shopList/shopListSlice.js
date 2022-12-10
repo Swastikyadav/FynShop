@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import moment from 'moment';
 import { shopData, areaDropdownOptions, categoryDropdownOptions } from '../../utils/data';
 
 const initialState = { shopData, areaDropdownOptions, categoryDropdownOptions };
@@ -30,6 +31,38 @@ export const shopListSlice = createSlice({
     },
     addNewCategory: (state, action) => {
       state.categoryDropdownOptions.push(action.payload);
+    },
+    filterByArea: (state, action) => {
+      state.shopData = initialState.shopData.filter(shop => {
+        return shop.area === action.payload;
+      });
+    },
+    filterByCategory: (state, action) => {
+      state.shopData = initialState.shopData.filter(shop => {
+        return shop.category === action.payload;
+      })
+    },
+    filterByStatus: (state, action) => {
+      const todayDate = moment(new Date());
+
+      if (action.payload === "open") {
+        state.shopData = initialState.shopData.filter(shop => {
+          const openingDate = moment(new Date(shop.openingDate));
+          const closingDate = moment(new Date(shop.closingDate));
+
+          return todayDate.isBetween(openingDate, closingDate);
+        });
+      } else if (action.payload === "close") {
+        state.shopData = initialState.shopData.filter(shop => {
+          const openingDate = moment(new Date(shop.openingDate));
+          const closingDate = moment(new Date(shop.closingDate));
+
+          return !todayDate.isBetween(openingDate, closingDate);
+        });
+      }
+    },
+    clearFilter: (state, action) => {
+      state.shopData = initialState.shopData;
     }
   }
 });
@@ -39,7 +72,11 @@ export const {
   deleteShop,
   updateShop,
   addNewArea,
-  addNewCategory
+  addNewCategory,
+  filterByArea,
+  filterByCategory,
+  filterByStatus,
+  clearFilter,
 } = shopListSlice.actions;
 
 // shopList Selector

@@ -4,19 +4,26 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Modal, Input, Select, Divider, Space, Button, DatePicker } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import styled from 'styled-components';
 
 import {
   addShop,
-  deleteShop,
   updateShop,
   addNewArea,
   addNewCategory,
   selectShopList,
-  filterByArea,
-  filterByCategory,
-  filterByStatus,
-  clearFilter,
 } from './shopListSlice';
+
+import Header from '../../components/Header';
+import Filters from '../../components/Filters';
+import ShopCard from '../../components/ShopCard';
+
+const ShopCardsContainer = styled.section`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 auto;
+`;
 
 const { RangePicker } = DatePicker;
 
@@ -26,8 +33,8 @@ export function ShopList() {
 
   const initialShopInfo = {
     name: "",
-    area: "",
-    category: "",
+    area: undefined,
+    category: undefined,
     openingDate: "",
     closingDate: "",
   }
@@ -37,9 +44,6 @@ export function ShopList() {
   const [newCategory, setNewCategory] = useState("");
   const [editShopId, setEditShopId] = useState("");
   const [newShopInfo, setNewShopInfo] = useState(initialShopInfo);
-  const [areaFilter, setAreaFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
@@ -112,75 +116,24 @@ export function ShopList() {
 
   return (
     <div>
-      <p>Filters</p>
-      <Select
-        placeholder="Filter by area"
-        options={areaDropdownOptions}
-        value={areaFilter}
-        onChange={e => {
-          setAreaFilter(e);
-          setCategoryFilter("");
-          setStatusFilter("");
-          dispatch(filterByArea(e));
-        }}
-      />
-      <Select
-        placeholder="Filter by category"
-        options={categoryDropdownOptions}
-        value={categoryFilter}
-        onChange={e => {
-          setCategoryFilter(e);
-          setAreaFilter("");
-          setStatusFilter("");
-          dispatch(filterByCategory(e));
-        }}
-      />
+      <Header setIsModalOpen={setIsModalOpen} />
 
-      <Select
-        placeholder="Filter by open/close status"
-        options={[
-          {
-            value: "open",
-            label: "Open",
-          },
-          {
-            value: "close",
-            label: "Close",
-          }
-        ]}
-        value={statusFilter}
-        onChange={e => {
-          setCategoryFilter("");
-          setAreaFilter("");
-          setStatusFilter(e);
-          dispatch(filterByStatus(e));
-        }}
-      />
-
-      <Button onClick={() => {
-        setAreaFilter("");
-        setCategoryFilter("");
-        dispatch(clearFilter());
-      }}>Clear Filter</Button>
-
-      <Button onClick={() => setIsModalOpen(true)}>+Add Shop</Button>
-      {
-        shopData.map((shop, idx) => {
-          return (<React.Fragment key={shop.id}>
-            <p>{shop.name}</p>
-            <small>
-              {moment(new Date(shop.openingDate)).format("YYYY MMM Do")} - {moment(new Date(shop.closingDate)).format("YYYY MMM Do")}
-            </small>
-            <br />
-            <small onClick={() => dispatch(deleteShop(shop.id))}>Delete</small>
-            <br />
-            <small id={shop.id} onClick={() => {
-              setEditShopId(shop.id);
-              setIsModalOpen(true);
-            }}>Update</small>
-          </React.Fragment>)
-        })
-      }
+      <Filters />
+      
+      <ShopCardsContainer>
+        {
+          shopData.map((shop, idx) => {
+            return (
+              <ShopCard
+                shop={shop}
+                setIsModalOpen={setIsModalOpen}
+                setEditShopId={setEditShopId}
+                key={idx}
+              />
+            )
+          })
+        }
+      </ShopCardsContainer>
 
       {isModalOpen && <Modal
         title={editShopId ? "Edit Shop" : "Add New Shop"}
@@ -200,31 +153,41 @@ export function ShopList() {
         {!isAlphabetOnly(newShopInfo.name) && <small style={{color: "red"}}>Only alphabets are allowed</small>}
         {isError && !newShopInfo.name && <small style={{color: "red"}}>Shop name is required</small>}
 
-        <Select
-          showSearch
-          placeholder="Select or add new area."
-          options={areaDropdownOptions}
-          value={newShopInfo.area}
-          onChange={e => setNewShopInfo({
-            ...newShopInfo,
-            area: e,
-          })}
-          dropdownRender={(menu) => dropDownRender(menu, "area")}
-        />
-        {isError && !newShopInfo.area && <small style={{color: "red"}}>Area is required</small>}
+        <br /><br />
 
-        <Select
-          showSearch
-          placeholder="Select or add new category."
-          options={categoryDropdownOptions}
-          value={newShopInfo.category}
-          onChange={e => setNewShopInfo({
-            ...newShopInfo,
-            category: e,
-          })}
-          dropdownRender={(menu) => dropDownRender(menu, "category")}
-        />
-        {isError && !newShopInfo.category && <small style={{color: "red"}}>Category is required</small>}
+        <div style={{display: "flex", flexWrap: "wrap"}}>
+          <span style={{marginRight: "4px"}}>
+            <Select
+              showSearch
+              placeholder="Select or add new area."
+              options={areaDropdownOptions}
+              value={newShopInfo.area}
+              onChange={e => setNewShopInfo({
+                ...newShopInfo,
+                area: e,
+              })}
+              dropdownRender={(menu) => dropDownRender(menu, "area")}
+            />
+            <br />
+            {isError && !newShopInfo.area && <small style={{color: "red"}}>Area is required</small>}
+          </span>
+
+          <span>
+            <Select
+              showSearch
+              placeholder="Select or add new category."
+              options={categoryDropdownOptions}
+              value={newShopInfo.category}
+              onChange={e => setNewShopInfo({
+                ...newShopInfo,
+                category: e,
+              })}
+              dropdownRender={(menu) => dropDownRender(menu, "category")}
+            />
+            <br />
+            {isError && !newShopInfo.category && <small style={{color: "red"}}>Category is required</small>}
+          </span>
+        </div>
 
         {
           editShopId && <>
@@ -237,6 +200,8 @@ export function ShopList() {
           </>
         }
         
+        <br />
+
         {editShopId && <small>Change opening and closing date</small>}
         <RangePicker
           onChange={e => setNewShopInfo({
@@ -245,20 +210,26 @@ export function ShopList() {
             closingDate: new Date(e[1]["$d"]).getTime(),
           })}
         />
+        <br />
         {isError && (!newShopInfo.openingDate || !newShopInfo.closingDate) && <small style={{color: "red"}}>Date range is required</small>}
 
-        <Button onClick={() => {
-          if (!newShopInfo.name || !newShopInfo.area || !newShopInfo.category || !newShopInfo.openingDate || !newShopInfo.closingDate || !isAlphabetOnly(newShopInfo.name)) {
-            setIsError(true);
-            return;
-          }
+        <br />
 
-          editShopId
-          ? dispatch(updateShop(newShopInfo))
-          : dispatch(addShop({ ...newShopInfo, id: uuidv4() }));
+        <Button
+          type="primary"
+          onClick={() => {
+            if (!newShopInfo.name || !newShopInfo.area || !newShopInfo.category || !newShopInfo.openingDate || !newShopInfo.closingDate || !isAlphabetOnly(newShopInfo.name)) {
+              setIsError(true);
+              return;
+            }
 
-          closeModal();
-        }}>
+            editShopId
+            ? dispatch(updateShop(newShopInfo))
+            : dispatch(addShop({ ...newShopInfo, id: uuidv4() }));
+
+            closeModal();
+          }}
+        >
           {editShopId ? "Edit Shop" : "Add Shop"}
         </Button>
       </Modal>}

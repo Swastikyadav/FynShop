@@ -18,7 +18,7 @@ export const shopData = [
     id: uuidv4(),
   },
   {
-    name: "Mr B's Cafe",
+    name: "Mr Bs Cafe",
     area: "Pune",
     category: "Baker",
     openingDate: new Date("2022-10-12").getTime(),
